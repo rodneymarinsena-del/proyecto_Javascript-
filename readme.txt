@@ -5,3 +5,5 @@ cd intro-express-js-pepito-perez
 npm install express 
 node app.js 
 http://localhost: 
+
+npm dev run 
