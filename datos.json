@@ -1,0 +1,17 @@
+[{
+    "dni": 1,
+    "nombre": "ana",
+    "apellido":"martines",
+    "correo": "dasda.com",
+    "imagen":"adsdada"
+    
+},
+    {
+    "dni": 2,
+    "nombre": "lucia",
+    "apellido":"mario",
+    "correo": "gami.",
+    "imagen":"dasdasd"
+    
+}
+]
