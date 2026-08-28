@@ -30,3 +30,10 @@ app.get("/otra/aprendices", (req, res)=>{
         res.json(listaAprendices)
     })
 });
+app.post ("/api/aprendices",(req,res)=>{
+    res.json({mensaje: "trabajando en el endpoint"})
+})
+
+app.listen(port, function(){
+  console.log(`SERVIDOR: http://localhost:${port}`);
+});
