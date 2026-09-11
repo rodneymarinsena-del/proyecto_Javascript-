@@ -1,26 +1,29 @@
 
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = process.env.port || 3000
 //configurar para la lectura del archivo
 const sistemaArchivo = require("fs")
 const ruta = require("path")
+const { stringify } = require('querystring')
 const rutaArchivoJson = ruta.join(__dirname, "datos.json")
-
-app.get("/", (_, res) => {
+//Importa libreria para subir archivos 
+const multer = require("multer")
+//middleware body-parse,  formatea los datos enviados 
+app.use(express.json())
+//endpoint raiz 
+app.get("/", (req, res) => {
 res.send("API Rest - Aprendices");
 });
-app.listen(port, () => {
-console.log( `Servidor en funcionamiento en el puerto: ${port}`);
-});
+
 
 // OTRO ENDPOINT
-app.get("/otra", (_, res) => {
+app.get("/otra", (req, res) => {
 res.send("API Rest Aprendices");
 });
 
 //endpoint para ver los datos del archivo
-app.get("/otra/aprendices", (req, res)=>{
+app.get("/api/aprendices", (req, res)=>{
     //datos vienen del archivo
     sistemaArchivo.readFile(rutaArchivoJson, "utf-8", (error, datos)=>{
         if(error){
@@ -29,11 +32,34 @@ app.get("/otra/aprendices", (req, res)=>{
         const listaAprendices = JSON.parse(datos)
         res.json(listaAprendices)
     })
-});
-app.post ("/api/aprendices",(req,res)=>{
-    res.json({mensaje: "trabajando en el endpoint"})
 })
 
-app.listen(port, function(){
-  console.log(`SERVIDOR: http://localhost:${port}`);
-});
+//endpoint para crear aprendices
+app.post("/api/aprendices", (req,res)=>{
+  //validar que se envien los datos
+  const nuevoAprendiz = req.body
+  //utilizamos la lectura del archivo
+  sistemaArchivo.readFile(rutaArchivoJson, "utf-8", (error, datos)=>{
+    if (error){
+      return res.json({Error: "No se puede leer los datos."})
+    }
+    const listaAprendices = JSON.parse(datos)
+    //agregar el nuevo aprendiz
+    listaAprendices.push(nuevoAprendiz)
+    //escribir en el archivo
+    sistemaArchivo.writeFile(rutaArchivoJson, JSON.stringify(listaAprendices, null, 2), (error)=>{
+      if(error){
+        res.status(500).json({Error: "No se puede registrar el aprendiz."})
+      }
+      res.status(201).json({mensaje: "Aprendiz creado con exito."})
+    })
+  })
+})
+
+app.listen(port, () => {
+    console.log( `Servidor en funcionamiento en el puerto: ${port}`)
+})
+    
+//8===D
+//EL ERROR ESTA ENTRE LA PANTALLA Y LA SILLA 
+//BRRRBRRRPATAPIN/RULE34.XXX
