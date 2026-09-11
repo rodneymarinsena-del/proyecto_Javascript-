@@ -3,45 +3,44 @@ const app = express();
 require("dotenv").config();
 const port = process.env.port || 3000;
 
-// IMPORTACIÓN CORRECTA: Traer las funciones requeridas
+// IMPORTACIONES
 const { validarNombre, validarCorreo, generarId } = require('./utilidades/validaciones');
-
-// Configurar para la lectura del archivo
 const sistemaArchivo = require("fs");
 const ruta = require("path");
-const { stringify } = require('querystring');
+const multer = require("multer"); // Una sola declaración de multer
+const registroMiddleware = require("./middleware/registroMiddleware");
+
 const rutaArchivoJson = ruta.join(__dirname, "datos.json");
 
-// Importa librería para subir archivos 
-const multer = require("multer");
-const { json } = require('stream/consumers');
-
-// CONFIGURAR ALMACENAMIENTO
+// CONFIGURAR ALMACENAMIENTO DE MULTER
 const almacenamiento = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, "misImagenes/");
-    },
-    filename: (req, file, cb) => {
-      const extencionArchivo = ruta.extname(file.originalname);
-      cb(null, `${Date.now()}${extencionArchivo}`);
-    }
+  destination: (req, file, cb) => {
+    cb(null, "misImagenes/");
+  },
+  filename: (req, file, cb) => {
+    const extencionArchivo = ruta.extname(file.originalname);
+    cb(null, `${Date.now()}${extencionArchivo}`);
+  }
 });
 
 const subArchivo = multer({ storage: almacenamiento });
 
-// Middleware body-parser, formatea los datos enviados
+// MIDDLEWARES DE PARSEO DE DATOS
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Middleware para registrar la fecha/hora en la consola (corregido)
-//middelware creados, se ejecuta cada ves que hago una peticion (get,post, put, delete)
+// MIDDLEWARES DE REGISTRO (Ubicados antes de los endpoints para que capturen TODAS las peticiones)
 app.use((req, res, next) => {
   console.log(`tiempo milisegundos: ${Date.now()}`);
   console.log(`fecha: ${new Date().toString()}`);
   next();
 });
 
-// Endpoint raíz 
+app.use(registroMiddleware);
+
+// ENDPOINTS
+
+// Endpoint raíz
 app.get("/", (req, res) => {
   res.send("API Rest - Aprendices");
 });
@@ -53,17 +52,17 @@ app.get("/otra", (req, res) => {
 
 // Endpoint para ver los datos del archivo
 app.get("/api/aprendices", (req, res) => {
-    sistemaArchivo.readFile(rutaArchivoJson, "utf-8", (error, datos) => {
-        if (error) {
-            return res.status(500).json({ Error: "No se puede leer los datos." });
-        }
-        const listaAprendices = JSON.parse(datos);
-        res.json(listaAprendices);
-    });
+  sistemaArchivo.readFile(rutaArchivoJson, "utf-8", (error, datos) => {
+    if (error) {
+      return res.status(500).json({ Error: "No se puede leer los datos." });
+    }
+    const listaAprendices = JSON.parse(datos);
+    res.json(listaAprendices);
+  });
 });
 
 // Endpoint para crear aprendices
-app.post("/api/aprendices", subArchivo.single("imagen"), (req, res) => {  
+app.post("/api/aprendices", subArchivo.single("imagen"), (req, res) => {
   const nuevoAprendiz = req.body;
 
   // Validar nombre
@@ -78,7 +77,7 @@ app.post("/api/aprendices", subArchivo.single("imagen"), (req, res) => {
 
   nuevoAprendiz.imagen = req.file ? `/misImagenes/${req.file.filename}` : "sin imagen";
 
-  // Utilizamos la lectura del archivo
+  // Lectura y escritura en el archivo JSON
   sistemaArchivo.readFile(rutaArchivoJson, "utf-8", (error, datos) => {
     if (error) {
       return res.status(500).json({ Error: "No se puede leer los datos." });
@@ -112,5 +111,5 @@ app.delete("/api/aprendices/:id", (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Servidor en funcionamiento en el puerto: ${port}`);
+  console.log(`Servidor en funcionamiento en el puerto: ${port}`);
 });
