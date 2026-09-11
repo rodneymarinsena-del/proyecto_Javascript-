@@ -56,6 +56,23 @@
     "correo": "gami.",
     "imagen": "dasdasd"
   },
-null,
-null
+  null,
+  null,
+  {
+    "dni": 3,
+    "nombre": "lucia",
+    "apellido": "mario",
+    "correo": "gami.",
+    "imagen": "sin imagen"
+  },
+  {
+    "nombre": "rodney",
+    "cargo": "aprendiz",
+    "imagen": "/misImagenes/1789141438770.png"
+  },
+  {
+    "nombre": "rodney",
+    "cargo": "aprendiz",
+    "imagen": "/misImagenes/1789141769563.png"
+  }
 ]
